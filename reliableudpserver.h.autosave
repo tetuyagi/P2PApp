@@ -1,0 +1,84 @@
+#ifndef RUDPSERVER_H
+#define RUDPSERVER_H
+
+
+#include <QUdpSocket>
+#include <QHostAddress>
+#include <QNetworkDatagram>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QMap>
+#include <QDeadlineTimer>
+#include <QUrl>
+
+#include "utility.h"
+
+
+
+class ReliableUdpServer : public QObject
+{
+    Q_OBJECT
+public:
+    ReliableUdpServer(qint16 port = 3333, QHostAddress address = QHostAddress::AnyIPv4, QObject *parent = 0);
+    ~ReliableUdpServer();
+
+    class ReceivedData{
+    public:
+        ReceivedData(uchar id, int maxCount);
+        ~ReceivedData();
+        void setPartialData(int count, QByteArray partialData);
+        bool isComplete();
+        bool isTimeout();
+        QByteArray getData();
+
+        int maxCount;
+        uchar id;
+
+    private:
+        QByteArray *partialDatas;
+        bool *done;
+        QDeadlineTimer deadline;
+
+    };
+
+
+    static const int UDP_MAX_BUFFER_SIZE = 1024;
+
+public slots:
+    void sendDatagram(QByteArray data, qint16 port, QHostAddress address);
+    void startSession(QUrl Address);
+    //void closeSession(Address);
+
+    void update();
+
+private:
+    class UserData{
+    public:
+        QString userName;
+
+    };
+
+    QUdpSocket *udpSocket;
+
+    QMap<int, QMap<uchar, ReceivedData*>> addressBuffers;
+    QMap<uchar, ReceivedData*> buffers;
+    long id;
+
+private slots:
+    void readPendingDatagram();
+    void processTheDatagram(QNetworkDatagram datagram);
+
+signals:
+    void receivedData(QByteArray byteArray);
+};
+
+/*
+class SessionData{
+public:
+    SessionData(ip, port);
+    ~SessionData();
+
+};
+*/
+
+#endif // RUDPSERVER_H
