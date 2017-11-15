@@ -2,8 +2,8 @@
  <author/>
  <comment/>
  <exportmacro/>
- <class>RoomWindow</class>
- <widget class="QMainWindow" name="RoomWindow">
+ <class>P2PWindow</class>
+ <widget class="QMainWindow" name="P2PWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
